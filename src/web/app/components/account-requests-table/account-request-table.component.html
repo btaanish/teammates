@@ -1,19 +1,33 @@
-<div class="card bg-light top-padded" *ngIf="accountRequests.length">
-    <div class="card-header bg-primary text-white">
-      <div *ngIf="searchString; else pendingRequests">
-        <strong>Account Requests Found</strong>
-      </div>
-      <ng-template #pendingRequests>
-        <strong>Pending Account Requests</strong>
-      </ng-template>
-      <div *ngIf="searchString" class="card-header-btn-toolbar">
-        <button id="show-account-request-links" class="btn btn-light btn-sm" style="margin-right: 10px;" type="button" (click)="showAllAccountRequestsLinks()">Expand All</button>
-        <button id="hide-account-request-links" class="btn btn-light btn-sm" type="button" (click)="hideAllAccountRequestsLinks()">Collapse All</button>
-      </div>
+<div class="card mb-3" *ngIf="accountRequests.length">
+  <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+    <ng-container *ngIf="searchString; else pendingRequests">
+      <strong>Account Requests Found</strong>
+    </ng-container>
+    <ng-template #pendingRequests>
+      <strong>Pending Account Requests</strong>
+    </ng-template>
+
+    <div *ngIf="searchString" class="btn-group">
+      <button 
+        id="show-account-request-links" 
+        class="btn btn-outline-light btn-sm" 
+        type="button" 
+        (click)="showAllAccountRequestsLinks()">
+        Expand All
+      </button>
+      <button 
+        id="hide-account-request-links" 
+        class="btn btn-outline-light btn-sm" 
+        type="button" 
+        (click)="hideAllAccountRequestsLinks()">
+        Collapse All
+      </button>
     </div>
-<div class="table-responsive">
-    <table class="table table-striped data-table" id="search-table-account-request">
-      <thead>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle" id="search-table-account-request">
+      <thead class="table-light">
         <tr>
           <th>Name</th>
           <th>Email</th>
@@ -22,70 +36,112 @@
           <th>Created At</th>
           <th *ngIf="searchString">Registered At</th>
           <th>Comments</th>
-          <th>Options</th>
+          <th class="text-center">Options</th>
         </tr>
       </thead>
       <tbody>
         <ng-container *ngFor="let accountRequest of accountRequests; let i = index; trackBy: trackAccountRequest">
           <tr>
-            <td [innerHtml]="accountRequest.name | highlighter:searchString:true">
-              <br>
-              <div class="col-sm-1">
-                <button *ngIf="!accountRequest.showLinks" class="btn" aria-label="Expand">
-                  <i class="fas fa-chevron-circle-down" style="color: blue;"></i>
-                </button>
-                <button *ngIf="accountRequest.showLinks" class="btn" aria-label="Collapse">
-                  <i class="fas fa-chevron-circle-up" style="color: blue;"></i>
-                </button>
-              </div>
-            </td>
-            <td [innerHtml]="accountRequest.email | highlighter:searchString:true">{{ accountRequest.email }}</td>
-            <td [innerHtml]="accountRequest.status | highlighter:searchString:true">{{ accountRequest.status }}</td>
-            <td [innerHtml]="accountRequest.instituteAndCountry | highlighter:searchString:true">{{ accountRequest.instituteAndCountry }}</td>
-            <td id="timestamp-box">{{ accountRequest.createdAtText }}</td>
-            <td *ngIf="searchString" id="timestamp-box">{{ accountRequest.registeredAtText || 'Not Registered Yet' }}</td>
             <td>
-              <div id="comment-box" [innerHtml]="accountRequest.comments | highlighter:searchString:true">
-                {{ accountRequest.comments }}
-                </div>
+              <div class="d-flex align-items-center">
+                <button 
+                  class="btn btn-link p-0 me-2" 
+                  (click)="accountRequest.showLinks = !accountRequest.showLinks"
+                  [attr.aria-label]="accountRequest.showLinks ? 'Collapse' : 'Expand'">
+                  <i class="fas" 
+                    [class.fa-chevron-circle-down]="!accountRequest.showLinks" 
+                    [class.fa-chevron-circle-up]="accountRequest.showLinks"
+                  ></i>
+                </button>
+                <span [innerHtml]="accountRequest.name | highlighter:searchString:true"></span>
+              </div>
             </td>
-            <td class="align-middle">
-              <div class="d-flex flex-row align-items-center justify-content-center gap-2">
-                <div>
-                  <a id="edit-account-request-{{i}}" (click)="$event.stopPropagation(); editAccountRequest(accountRequest);">
-                    <i class="fa-solid fa-pen"></i>
-                  </a>
-                </div>
-              <div class="ngb-tooltip-class" [ngbTooltip]="accountRequest.registeredAtText && 'Account requests of registered instructors cannot be deleted'" placement="top">
-                <a id="delete-account-request-{{i}}" (click)="$event.stopPropagation(); deleteAccountRequest(accountRequest)">
+            <td [innerHtml]="accountRequest.email | highlighter:searchString:true"></td>
+            <td [innerHtml]="accountRequest.status | highlighter:searchString:true"></td>
+            <td [innerHtml]="accountRequest.instituteAndCountry | highlighter:searchString:true"></td>
+            <td>{{ accountRequest.createdAtText }}</td>
+            <td *ngIf="searchString">
+              {{ accountRequest.registeredAtText || 'Not Registered Yet' }}
+            </td>
+            <td>
+              <div [innerHtml]="accountRequest.comments | highlighter:searchString:true"></div>
+            </td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <button 
+                  id="edit-account-request-{{i}}" 
+                  class="btn btn-outline-secondary"
+                  (click)="$event.stopPropagation(); editAccountRequest(accountRequest);"
+                  aria-label="Edit Request">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                
+                <button 
+                  id="view-account-request-{{i}}" 
+                  class="btn btn-outline-secondary"
+                  (click)="$event.stopPropagation(); viewAccountRequest(accountRequest);"
+                  aria-label="View Request">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                
+                <button 
+                  id="delete-account-request-{{i}}" 
+                  class="btn btn-outline-secondary" 
+                  [disabled]="accountRequest.registeredAtText"
+                  (click)="$event.stopPropagation(); deleteAccountRequest(accountRequest)"
+                  aria-label="Delete Request">
                   <i class="fa-solid fa-trash"></i>
-                </a>
-              </div>
-              <div>
-                <a id="view-account-request-{{i}}" (click)="$event.stopPropagation(); viewAccountRequest(accountRequest)">
-                    <i class="fa-solid fa-eye"></i>
-                </a>
-              </div>
-              <button id="approve-account-request-{{i}}" class="btn btn-success" [disabled]="!accountRequest.status || accountRequest.status === 'APPROVED' || accountRequest.status === 'REGISTERED' || isApprovingAccount[i]" (click)="$event.stopPropagation(); approveAccountRequest(accountRequest, i)"> <tm-ajax-loading *ngIf="isApprovingAccount[i]"></tm-ajax-loading>Approve</button>
-              <span ngbDropdown container="body">
-                <button id="reject-account-request-{{i}}" type="button" class="btn btn-warning" [disabled]="!accountRequest.status || accountRequest.status === 'REGISTERED' || accountRequest.status === 'APPROVED' || accountRequest.status === 'REJECTED' || isRejectingAccount[i]" ngbDropdownToggle> <tm-ajax-loading *ngIf="isRejectingAccount[i]"></tm-ajax-loading> Reject </button>
-                <div ngbDropdownMenu (click)="$event.stopPropagation()">
-                  <button id="reject-request-{{i}}" class="btn btn-light btn-sm dropdown-item" (click)="$event.stopPropagation(); rejectAccountRequest(accountRequest, i)"> Reject </button>
-                  <button id="reject-request-with-reason-{{i}}" class="btn btn-light btn-sm dropdown-item" (click)="$event.stopPropagation(); rejectAccountRequestWithReason(accountRequest, i)"> Reject With Reason </button>
+                </button>
+                
+                <button 
+                  id="approve-account-request-{{i}}" 
+                  class="btn btn-success"
+                  [disabled]="!accountRequest.status || accountRequest.status === 'APPROVED' || accountRequest.status === 'REGISTERED' || isApprovingAccount[i]"
+                  (click)="$event.stopPropagation(); approveAccountRequest(accountRequest, i)">
+                  <tm-ajax-loading *ngIf="isApprovingAccount[i]"></tm-ajax-loading>
+                  Approve
+                </button>
+                
+                <div class="btn-group" ngbDropdown container="body">
+                  <button 
+                    id="reject-account-request-{{i}}" 
+                    type="button" 
+                    class="btn btn-warning" 
+                    [disabled]="!accountRequest.status || accountRequest.status === 'REGISTERED' || accountRequest.status === 'APPROVED' || accountRequest.status === 'REJECTED' || isRejectingAccount[i]"
+                    ngbDropdownToggle>
+                    <tm-ajax-loading *ngIf="isRejectingAccount[i]"></tm-ajax-loading>
+                    Reject
+                  </button>
+                  <div ngbDropdownMenu (click)="$event.stopPropagation()">
+                    <button 
+                      id="reject-request-{{i}}" 
+                      class="dropdown-item"
+                      (click)="$event.stopPropagation(); rejectAccountRequest(accountRequest, i)">Reject</button>
+                    <button 
+                      id="reject-request-with-reason-{{i}}" 
+                      class="dropdown-item"
+                      (click)="$event.stopPropagation(); rejectAccountRequestWithReason(accountRequest, i)">Reject With Reason</button>
+                  </div>
                 </div>
-              </span>
-              <div *ngIf="searchString" class="ngb-tooltip-class" [ngbTooltip]="accountRequest.registeredAtText && 'Account requests of registered instructors cannot be deleted'" placement="top">
-                <button id="reset-account-request-{{i}}" class="btn btn-primary" [disabled]="!accountRequest.registeredAtText || isResettingAccount[i]" (click)="$event.stopPropagation(); resetAccountRequest(accountRequest, i);"> <tm-ajax-loading *ngIf="isResettingAccount[i]"></tm-ajax-loading>Reset</button>
+                
+                <button 
+                  *ngIf="searchString"
+                  id="reset-account-request-{{i}}" 
+                  class="btn btn-primary"
+                  [disabled]="!accountRequest.registeredAtText || isResettingAccount[i]"
+                  (click)="$event.stopPropagation(); resetAccountRequest(accountRequest, i)">
+                  <tm-ajax-loading *ngIf="isResettingAccount[i]"></tm-ajax-loading>
+                  Reset
+                </button>
               </div>
-            </div>
             </td>
           </tr>
           <tr *ngIf="accountRequest.showLinks && searchString">
             <td colspan="100">
-              <ul class="list-group" *ngIf="accountRequest.showLinks" @collapseAnim>
+              <ul class="list-group" @collapseAnim>
                 <li class="list-group-item list-group-item-info">
                   <strong>Account Registration Link</strong>
-                  <input [value]="accountRequest.registrationLink" disabled class="form-control">
+                  <input [value]="accountRequest.registrationLink" disabled class="form-control mt-2">
                 </li>
               </ul>
             </td>
@@ -94,3 +150,4 @@
       </tbody>
     </table>
   </div>
+</div>
